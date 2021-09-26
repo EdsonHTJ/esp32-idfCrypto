@@ -8,10 +8,10 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/210925-002659-espidf-http-request/include",
-                "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/210925-002659-espidf-http-request/src",
+                "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/esp32-cryptoHttp/include",
+                "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/esp32-cryptoHttp/src",
                 "C:/Users/edson/.platformio/packages/framework-espidf/components/esp_pm/include",
-                "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/210925-002659-espidf-http-request/.pio/build/esp32dev/config",
+                "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/esp32-cryptoHttp/.pio/build/esp32dev/config",
                 "C:/Users/edson/.platformio/packages/framework-espidf/components/newlib/platform_include",
                 "C:/Users/edson/.platformio/packages/framework-espidf/components/freertos/include",
                 "C:/Users/edson/.platformio/packages/framework-espidf/components/freertos/port/xtensa/include",
@@ -121,10 +121,10 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/210925-002659-espidf-http-request/include",
-                    "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/210925-002659-espidf-http-request/src",
+                    "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/esp32-cryptoHttp/include",
+                    "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/esp32-cryptoHttp/src",
                     "C:/Users/edson/.platformio/packages/framework-espidf/components/esp_pm/include",
-                    "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/210925-002659-espidf-http-request/.pio/build/esp32dev/config",
+                    "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/esp32-cryptoHttp/.pio/build/esp32dev/config",
                     "C:/Users/edson/.platformio/packages/framework-espidf/components/newlib/platform_include",
                     "C:/Users/edson/.platformio/packages/framework-espidf/components/freertos/include",
                     "C:/Users/edson/.platformio/packages/framework-espidf/components/freertos/port/xtensa/include",
