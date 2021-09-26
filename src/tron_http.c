@@ -5,7 +5,7 @@ static const char *TAG = "http";
 extern const char server_root_cert_pem_start[] asm("_binary_rootca_pem_start");
 extern const char server_root_cert_pem_end[]   asm("_binary_rootca_pem_end");
 
-#define ACCOUNT "TWsFJR5PPBa96PkNAPzKB6aLtvKpiP31na"
+#define ACCOUNT "TLUQqFyXw1FGdmjNWJpHqJULFj2QTLXjfx"
 #define PATH "/v1/accounts/"
 
 char output_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0x00};
@@ -27,6 +27,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             break;
         case HTTP_EVENT_ON_CONNECTED:
             ESP_LOGD(TAG, "HTTP_EVENT_ON_CONNECTED");
+            memset(output_buffer, 0x00, MAX_HTTP_OUTPUT_BUFFER);
             break;
         case HTTP_EVENT_HEADER_SENT:
             ESP_LOGD(TAG, "HTTP_EVENT_HEADER_SENT");

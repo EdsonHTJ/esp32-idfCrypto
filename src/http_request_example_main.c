@@ -27,7 +27,8 @@
 #include "esp_crt_bundle.h"
 
 #include "esp_http_client.h"
-#include <tron_http.h>
+#include "tron_http.h"
+#include "cJSON.h"
 
 QueueHandle_t xBuffQueue;
 
@@ -46,8 +47,22 @@ static void process_json_task(void *pvParameters){
     for(;;){
         xQueueReceive(xBuffQueue, (void*) &data_ptr, portMAX_DELAY);
         ESP_LOGI("main", "CONTENT PTR: %i", data_ptr);
-        p_data = data_ptr;
+        p_data = (char*) data_ptr;
         ESP_LOGI("main", "CONTENT: %s", p_data);
+
+        cJSON* request_json = NULL;
+        cJSON* data = cJSON_CreateArray();
+        cJSON* balance = NULL;
+        cJSON* subitem = NULL;
+
+        request_json = cJSON_Parse(p_data);
+        data = cJSON_GetObjectItem(request_json, "data");
+        subitem = cJSON_GetArrayItem(data, 0);
+        balance = cJSON_GetObjectItem(subitem, "balance");
+
+        ESP_LOGI("main", "BALANCE: %i", balance->valueint);
+
+        
 
     }
 }
