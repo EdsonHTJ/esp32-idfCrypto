@@ -30,17 +30,20 @@
 #include "tron_http.h"
 #include "cJSON.h"
 
-QueueHandle_t xBuffQueue;
+QueueHandle_t xBuffQueue, xBalanceQueue;
 
-static void accout_update_balance_task(void *pvParameters){
+void https_request_task(void *pvParameters){
+
+    esp_http_client_handle_t client = https_init();
     for(;;)
     {
-        https_with_hostname_path();
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        https_with_hostname_path(client);
+        vTaskDelay(20000 / portTICK_PERIOD_MS);
     }
+    esp_http_client_cleanup(client);
 }
 
-static void process_json_task(void *pvParameters){
+void process_json_task(void *pvParameters){
 
     uint32_t data_ptr = 0x00;
     char* p_data;
@@ -67,11 +70,34 @@ static void process_json_task(void *pvParameters){
     }
 }
 
-void on_response_result_callback(char* p_data)
+void balance_controller_task(void *pvParameters){
+    int balance = -1;
+    for(;;){
+
+    }
+}
+
+void on_response_result_callback(char* p_data, size_t size)
 {
-    ESP_LOGI("main", "Addr: %i", (uint32_t) p_data);
-    uint32_t data_ptr = (uint32_t) p_data;
-    xQueueSendToFront(xBuffQueue, &data_ptr, portMAX_DELAY);
+
+    
+    ESP_LOGI("main", "Content: %s", p_data);
+
+    char* ptr = strstr(p_data, "\"balance\"");
+    ptr += sizeof("\"balance\"");
+    char* ptrEnd = strstr(ptr, ",");
+    size_t strSize = (size_t)(ptrEnd - ptr);
+    ESP_LOGI("main", "size: %i", strSize);
+
+    char balanceStr[strSize + 1];
+    memset(balanceStr, 0x00, sizeof(balanceStr));
+    strncpy(balanceStr, ptr, sizeof(balanceStr));
+
+    balanceStr[strSize] = 0x00;
+    long balance = atol(balanceStr);
+   
+    ESP_LOGI("main", "B: %ld", balance);
+
 } 
 
 void app_main(void)
@@ -82,7 +108,8 @@ void app_main(void)
     ESP_ERROR_CHECK(example_connect());
 
     xBuffQueue = xQueueCreate(2, sizeof(char*));
+    xBalanceQueue = xQueueCreate(2, sizeof(int));
 
-    xTaskCreate(&accout_update_balance_task, "accout_update_balance", 4 * 8192, NULL, 5, NULL);
+    xTaskCreate(&https_request_task, "https_request", 5 * 8192, NULL, 5, NULL);
     xTaskCreate(&process_json_task, "process_json", 8192, NULL, 5, NULL);
 }

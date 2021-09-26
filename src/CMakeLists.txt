@@ -1,4 +1,4 @@
-idf_component_register(SRCS "http_request_example_main.c"
+idf_component_register(SRCS "main.c"
                             "tron_http.c"
                     INCLUDE_DIRS "."                    )
 

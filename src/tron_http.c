@@ -5,14 +5,14 @@ static const char *TAG = "http";
 extern const char server_root_cert_pem_start[] asm("_binary_rootca_pem_start");
 extern const char server_root_cert_pem_end[]   asm("_binary_rootca_pem_end");
 
-#define ACCOUNT "TLUQqFyXw1FGdmjNWJpHqJULFj2QTLXjfx"
+#define ACCOUNT "TWsFJR5PPBa96PkNAPzKB6aLtvKpiP31na"
 #define PATH "/v1/accounts/"
 
 char output_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0x00};
 
 
 
-__attribute__((weak)) void on_response_result_callback(char* p_data)
+__attribute__((weak)) void on_response_result_callback(char* p_data, size_t len)
 {
 
 } 
@@ -28,6 +28,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
         case HTTP_EVENT_ON_CONNECTED:
             ESP_LOGD(TAG, "HTTP_EVENT_ON_CONNECTED");
             memset(output_buffer, 0x00, MAX_HTTP_OUTPUT_BUFFER);
+            output_len = 0;
             break;
         case HTTP_EVENT_HEADER_SENT:
             ESP_LOGD(TAG, "HTTP_EVENT_HEADER_SENT");
@@ -43,7 +44,8 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
         case HTTP_EVENT_ON_FINISH:
             ESP_LOGD(TAG, "HTTP_EVENT_ON_FINISH");
             ESP_LOGD(TAG, "CONTENT %s", output_buffer);
-            on_response_result_callback(output_buffer);
+            ESP_LOGI(TAG, "CONTENT LEN %i", output_len);
+            on_response_result_callback(output_buffer, output_len);
             output_len = 0;
             break;
         case HTTP_EVENT_DISCONNECTED:
@@ -52,8 +54,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     }
     return ESP_OK;
 }
-
-void https_with_hostname_path()
+esp_http_client_handle_t https_init()
 {
     esp_http_client_config_t config = {
         .host = "api.trongrid.io",
@@ -61,9 +62,14 @@ void https_with_hostname_path()
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
         .event_handler = _http_event_handler,
         .cert_pem = server_root_cert_pem_start,
-        .keep_alive_enable = true,
+        .timeout_ms = 2000
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
+    return client;
+}
+
+void https_with_hostname_path(esp_http_client_handle_t client)
+{
     esp_err_t err = esp_http_client_perform(client);
 
     if (err == ESP_OK) {
@@ -73,5 +79,4 @@ void https_with_hostname_path()
     } else {
         ESP_LOGD(TAG, "HTTP HEAD request failed: %s", esp_err_to_name(err));
     }
-    esp_http_client_cleanup(client);
 }
