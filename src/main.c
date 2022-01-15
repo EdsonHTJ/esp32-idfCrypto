@@ -115,12 +115,19 @@ void gpio_task(void *pvParameters)
 void on_response_result_callback(char* p_data, size_t size)
 {
 
+    long balance;
     gpio_enum_t command = BLINK_BLUE_LED;
     xQueueSend(xGpioQueue, &command, portMAX_DELAY);
     
     ESP_LOGI("main", "Content: %s", p_data);
 
     char* ptr = strstr(p_data, "\"balance\"");
+    if (ptr == NULL) {
+        balance = 0;
+        xQueueSend(xBalanceQueue, &balance, portMAX_DELAY);
+        return;
+    }
+    
     ptr += sizeof("\"balance\"");
     char* ptrEnd = strstr(ptr, ",");
     size_t strSize = (size_t)(ptrEnd - ptr);
@@ -131,7 +138,7 @@ void on_response_result_callback(char* p_data, size_t size)
     strncpy(balanceStr, ptr, sizeof(balanceStr));
 
     balanceStr[strSize] = 0x00;
-    long balance = atol(balanceStr);
+    balance = atol(balanceStr);
    
     ESP_LOGI("main", "B: %ld", balance);
 
