@@ -7,6 +7,9 @@ extern const char server_root_cert_pem_end[]   asm("_binary_rootca_pem_end");
 
 #define ACCOUNT "TWsFJR5PPBa96PkNAPzKB6aLtvKpiP31na"
 #define PATH "/v1/accounts/"
+#define HOST "api.trongrid.io"
+#define HTTPS_PREFIX "https://"
+#define URL HTTPS_PREFIX HOST PATH
 
 char output_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0x00};
 
@@ -57,8 +60,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 esp_http_client_handle_t https_init()
 {
     esp_http_client_config_t config = {
-        .host = "api.trongrid.io",
-        .path = PATH ACCOUNT,
+        .url = HTTPS_PREFIX HOST,
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
         .event_handler = _http_event_handler,
         .cert_pem = server_root_cert_pem_start,
@@ -68,8 +70,12 @@ esp_http_client_handle_t https_init()
     return client;
 }
 
-void https_with_hostname_path(esp_http_client_handle_t client)
+void https_with_hostname_path(esp_http_client_handle_t client, char* p_acc)
 {
+    char url[sizeof(URL) + 35] = URL;
+    strncpy(url + sizeof(URL) - 1, p_acc, 34);
+    ESP_LOGI(TAG, "url: %s", url);
+    esp_http_client_set_url(client, url);
     esp_err_t err = esp_http_client_perform(client);
 
     if (err == ESP_OK) {

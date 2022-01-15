@@ -25,5 +25,5 @@
 #define MAX_HTTP_OUTPUT_BUFFER 8192
 
 esp_http_client_handle_t https_init();
-void https_with_hostname_path(esp_http_client_handle_t client);
+void https_with_hostname_path(esp_http_client_handle_t client, char* p_acc);
 #endif

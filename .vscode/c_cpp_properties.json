@@ -8,6 +8,8 @@
         {
             "name": "PlatformIO",
             "includePath": [
+                "c:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/esp32-cryptoHttp/include",
+                "c:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/esp32-cryptoHttp/src",
                 "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/esp32-cryptoHttp/include",
                 "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/esp32-cryptoHttp/src",
                 "C:/Users/edson/.platformio/packages/framework-espidf/components/esp_pm/include",
@@ -121,6 +123,8 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
+                    "c:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/esp32-cryptoHttp/include",
+                    "c:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/esp32-cryptoHttp/src",
                     "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/esp32-cryptoHttp/include",
                     "C:/Users/edson/OneDrive/Documentos/PlatformIO/Projects/esp32-cryptoHttp/src",
                     "C:/Users/edson/.platformio/packages/framework-espidf/components/esp_pm/include",
@@ -236,7 +240,7 @@
                 "_GNU_SOURCE",
                 "IDF_VER=\"4.3.0\"",
                 "ESP_PLATFORM",
-                "PLATFORMIO=50200",
+                "PLATFORMIO=50204",
                 "ARDUINO_ESP32_DEV",
                 ""
             ],

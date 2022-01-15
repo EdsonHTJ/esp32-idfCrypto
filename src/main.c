@@ -16,6 +16,7 @@
 #include "nvs_flash.h"
 #include "protocol_examples_common.h"
 #include "cJSON.h"
+#include "driver/gpio.h"
 
 #include "lwip/err.h"
 #include "lwip/sockets.h"
@@ -30,49 +31,83 @@
 #include "tron_http.h"
 #include "cJSON.h"
 
-QueueHandle_t xBuffQueue, xBalanceQueue;
+#define RELAY1 12
+#define LED 2
 
-void https_request_task(void *pvParameters){
+#define ACCOUNT "TWsFJR5PPBa96PkNAPzKB6aLtvKpiP31na"
 
+typedef enum gpio_enum{
+    BLINK_BLUE_LED = 0,
+    ACTIVATE_RELAY1,
+} gpio_enum_t;
+
+QueueHandle_t xBalanceQueue, xGpioQueue;
+
+void https_request_task(void *pvParameters)
+{
     esp_http_client_handle_t client = https_init();
     for(;;)
     {
-        https_with_hostname_path(client);
-        vTaskDelay(20000 / portTICK_PERIOD_MS);
+        https_with_hostname_path(client, ACCOUNT);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
     esp_http_client_cleanup(client);
 }
 
-void process_json_task(void *pvParameters){
-
-    uint32_t data_ptr = 0x00;
-    char* p_data;
+void balance_controller_task(void *pvParameters)
+{
+    long balance = -1;
+    long prevBalance = -1;
     for(;;){
-        xQueueReceive(xBuffQueue, (void*) &data_ptr, portMAX_DELAY);
-        ESP_LOGI("main", "CONTENT PTR: %i", data_ptr);
-        p_data = (char*) data_ptr;
-        ESP_LOGI("main", "CONTENT: %s", p_data);
 
-        cJSON* request_json = NULL;
-        cJSON* data = cJSON_CreateArray();
-        cJSON* balance = NULL;
-        cJSON* subitem = NULL;
+        /*xQueueReceive(xGpioQueue, &command, portMAX_DELAY);
+        ESP_LOGI("main", "COMMAND RECIVED %i", (int)command);*/
+        prevBalance = balance;
+        xQueueReceive(xBalanceQueue, &balance, portMAX_DELAY);
+        ESP_LOGI("main", "Balance: %ld", balance);
+        if(prevBalance == -1){
+            continue;
+        }
 
-        request_json = cJSON_Parse(p_data);
-        data = cJSON_GetObjectItem(request_json, "data");
-        subitem = cJSON_GetArrayItem(data, 0);
-        balance = cJSON_GetObjectItem(subitem, "balance");
-
-        ESP_LOGI("main", "BALANCE: %i", balance->valueint);
-
-        
+        if(balance > prevBalance){
+            gpio_enum_t command = ACTIVATE_RELAY1;
+            xQueueSend(xGpioQueue, &command, portMAX_DELAY);
+        }
 
     }
 }
 
-void balance_controller_task(void *pvParameters){
-    int balance = -1;
+void gpio_task(void *pvParameters)
+{
+    gpio_enum_t command = -1;
+    uint32_t level = 1; 
     for(;;){
+
+        xQueueReceive(xGpioQueue, &command, portMAX_DELAY);
+        ESP_LOGI("main", "COMMAND RECIVED %i", (int)command);
+
+        switch (command)
+        {
+        case BLINK_BLUE_LED:
+            ESP_LOGI("main", "LED BLINK CALLED");
+            level = 1;
+            for(int i = 0; i < 10; i++){
+                level = !level;
+                gpio_set_level(LED, level);
+                vTaskDelay(100 / portTICK_PERIOD_MS);
+            }
+            break;
+
+        case ACTIVATE_RELAY1:
+            ESP_LOGI("main", "RELAY CALLED");
+            gpio_set_level(RELAY1, 1);
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            gpio_set_level(RELAY1, 0);
+            break;
+
+        default:
+            break;
+        }
 
     }
 }
@@ -80,6 +115,8 @@ void balance_controller_task(void *pvParameters){
 void on_response_result_callback(char* p_data, size_t size)
 {
 
+    gpio_enum_t command = BLINK_BLUE_LED;
+    xQueueSend(xGpioQueue, &command, portMAX_DELAY);
     
     ESP_LOGI("main", "Content: %s", p_data);
 
@@ -98,6 +135,8 @@ void on_response_result_callback(char* p_data, size_t size)
    
     ESP_LOGI("main", "B: %ld", balance);
 
+    xQueueSend(xBalanceQueue, &balance, portMAX_DELAY);
+
 } 
 
 void app_main(void)
@@ -107,9 +146,16 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     ESP_ERROR_CHECK(example_connect());
 
-    xBuffQueue = xQueueCreate(2, sizeof(char*));
-    xBalanceQueue = xQueueCreate(2, sizeof(int));
+    xBalanceQueue = xQueueCreate(2, sizeof(long));
+    xGpioQueue = xQueueCreate(2, sizeof(gpio_enum_t));
+
+    gpio_pad_select_gpio(LED);
+    gpio_set_direction(LED, GPIO_MODE_OUTPUT);
+
+    gpio_pad_select_gpio(RELAY1);
+    gpio_set_direction(RELAY1, GPIO_MODE_OUTPUT);
 
     xTaskCreate(&https_request_task, "https_request", 5 * 8192, NULL, 5, NULL);
-    xTaskCreate(&process_json_task, "process_json", 8192, NULL, 5, NULL);
+    xTaskCreate(&balance_controller_task, "balance_controller", 8192, NULL, 5, NULL);
+    xTaskCreate(&gpio_task, "gpio_task", 2048 , NULL, 5, NULL);
 }

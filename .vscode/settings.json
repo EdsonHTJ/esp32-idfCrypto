@@ -1,6 +1,7 @@
 {
     "cmake.configureOnOpen": true,
     "files.associations": {
-        "tron_http.h": "c"
+        "tron_http.h": "c",
+        "cstdlib": "cpp"
     }
 }
