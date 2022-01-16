@@ -10,7 +10,6 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "protocol_examples_common.h"
-#include "cJSON.h"
 
 #include "lwip/err.h"
 #include "lwip/sockets.h"
@@ -26,4 +25,5 @@
 
 esp_http_client_handle_t https_init();
 void https_with_hostname_path(esp_http_client_handle_t client, char* p_acc);
+
 #endif
